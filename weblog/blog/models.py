@@ -34,8 +34,8 @@ class Post(models.Model):
     category =models.ManyToManyField(Category)
     tags =models.ManyToManyField(Tag)
     published =models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    updated_at = models.DateTimeField(auto_now=True,  editable=False)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
     
 
     def __str__(self):
@@ -45,7 +45,7 @@ class comment(models.Model):
         post=models.ForeignKey(Post,on_delete=models.CASCADE)
         author=models.CharField(max_length=30)
         body =models.TextField(max_length=500)
-        created_at = models.DateTimeField(auto_now=True, editable=False)
+        created_at = models.DateTimeField()
         def __str__(self):
             return f"{self.author}"
         
