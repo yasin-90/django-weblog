@@ -1,0 +1,515 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Weblog Feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Space+Mono:wght@400;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board:#1a1b2e;
+    --board-2:#22243d;
+    --card:#262a45;
+    --chalk:#f0ece2;
+    --chalk-dim:#b8b4c9;
+    --chalk-faint:rgba(184,180,201,0.55);
+    --chalk-yellow:#ff6b5b;
+    --chalk-blue:#6bcfcf;
+    --chalk-rose:#d94f3f;
+    --rule: rgba(240,236,226,0.1);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--board);
+    font-family:'Source Serif 4', serif;
+    color:var(--chalk);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    max-width:720px;
+    margin:0 auto;
+    padding:26px 20px 18px;
+    border-bottom:1px dashed rgba(240,236,226,0.15);
+  }
+  .brand{
+    font-family:'Caveat', cursive;
+    font-weight:700;
+    font-size:34px;
+    color:var(--chalk);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .brand .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--chalk-yellow);
+    box-shadow:0 0 6px var(--chalk-yellow);
+  }
+  .user{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-family:'Space Mono', monospace;
+    font-size:13px;
+    color:var(--chalk-dim);
+  }
+  .avatar{
+    width:32px;height:32px;border-radius:50%;
+    background:var(--chalk-blue);
+    color:var(--board);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;
+    font-family:'Space Mono', monospace;
+    flex-shrink:0;
+    box-shadow:0 0 0 2px rgba(240,236,226,0.12);
+  }
+  .logout{
+    color:var(--chalk-rose);
+    text-decoration:none;
+    border-bottom:1px dashed var(--chalk-rose);
+    padding-bottom:1px;
+  }
+
+  .wrap{
+    max-width:720px;
+    margin:0 auto;
+    padding:28px 20px 80px;
+  }
+
+  /* ---------- composer ---------- */
+  .composer{
+    background:var(--card);
+    border:1px solid rgba(240,236,226,0.1);
+    border-radius:6px;
+    padding:18px 20px;
+    margin-bottom:36px;
+  }
+  .composer .label{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--chalk-blue);
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .composer .label::before{content:"";}
+  .composer .label::after{
+    content:"";
+  }
+  .composer input[type="text"],
+  .composer textarea{
+    width:100%;
+    background:transparent;
+    border:none;
+    color:var(--chalk);
+    font-family:'Source Serif 4', serif;
+    font-size:16px;
+    line-height:1.6;
+    outline:none;
+    padding:0;
+  }
+  .composer input[type="text"]{
+    font-weight:600;
+    font-size:19px;
+    margin-bottom:14px;
+    padding-bottom:12px;
+    border-bottom:1px dashed rgba(240,236,226,0.15);
+  }
+  .composer textarea{
+    min-height:80px;
+    resize:vertical;
+  }
+  .composer input::placeholder,
+  .composer textarea::placeholder{color:var(--chalk-faint);}
+
+  .meta-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    margin-top:16px;
+    padding-top:16px;
+    border-top:1px dashed rgba(240,236,226,0.12);
+  }
+  .meta-field{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+  .meta-field .mini-label{
+    font-family:'Space Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--chalk-faint);
+  }
+  .meta-row select,
+  .meta-row input[type="file"]{
+    background:var(--board-2);
+    color:var(--chalk-dim);
+    border:1px solid rgba(240,236,226,0.14);
+    border-radius:8px;
+    padding:8px 12px;
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    outline:none;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .meta-row select{
+    appearance:none;
+    -webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237fa1c3' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:left 10px center;
+    background-size:14px;
+    padding-left:32px;
+    min-width:150px;
+    cursor:pointer;
+  }
+  .meta-row select:focus,
+  .meta-row input[type="file"]:focus{
+    border-color:var(--chalk-blue);
+  }
+  .meta-row input[type="file"]{
+    max-width:230px;
+  }
+  .meta-row input[type="file"]::file-selector-button{
+    background:var(--chalk-yellow);
+    color:var(--board);
+    border:none;
+    border-radius:6px;
+    padding:5px 10px;
+    margin-left:8px;
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .file-preview{
+    display:none;
+    margin-top:14px;
+    max-height:180px;
+    width:100%;
+    object-fit:cover;
+    border-radius:10px;
+    border:1px solid rgba(240,236,226,0.14);
+  }
+
+  .composer-footer{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:16px;
+    padding-top:16px;
+    border-top:1px dashed rgba(240,236,226,0.12);
+  }
+  .btn{
+    font-family:'Space Mono', monospace;
+    font-size:13px;
+    letter-spacing:0.04em;
+    background:var(--chalk-yellow);
+    color:var(--board);
+    border:none;
+    padding:9px 18px;
+    border-radius:4px;
+    cursor:pointer;
+    font-weight:700;
+    transition:filter .15s ease;
+  }
+  .btn:hover{filter:brightness(1.08);}
+
+  /* ---------- posts ---------- */
+  .post{
+    padding:26px 0;
+    border-bottom:1px dashed rgba(240,236,226,0.12);
+  }
+  .post-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .post-author{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .post-author .name{
+    font-weight:600;
+    font-size:15px;
+  }
+  .post-author .time{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    color:var(--chalk-faint);
+  }
+  .post-actions form{display:inline;}
+  .post-actions button{
+    background:none;
+    border:none;
+    color:var(--chalk-faint);
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    cursor:pointer;
+    padding:4px 10px;
+    border-radius:6px;
+    transition:color .15s ease, background .15s ease;
+  }
+  .post-actions .delete:hover{color:var(--chalk-rose); background:rgba(240,236,226,0.08);}
+
+  .post-title{
+    font-size:22px;
+    font-weight:700;
+    margin:0 0 10px;
+    letter-spacing:-0.01em;
+  }
+
+  .post-image{
+    width:100%;
+    max-height:380px;
+    object-fit:cover;
+    border-radius:10px;
+    margin-bottom:16px;
+    display:block;
+    border:1px solid rgba(240,236,226,0.1);
+  }
+
+  .post-body{
+    font-size:17px;
+    line-height:1.75;
+    color:var(--chalk);
+    margin-bottom:16px;
+  }
+
+  .taxonomy{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .tag-pill{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    color:var(--board);
+    background:var(--chalk-blue);
+    border-radius:20px;
+    padding:2px 10px;
+    font-weight:700;
+  }
+  .cat-pill{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    color:var(--board);
+    background:var(--chalk-yellow);
+    border-radius:20px;
+    padding:2px 10px;
+    font-weight:700;
+  }
+  /* comments */
+  .comments{
+    margin-top:12px;
+    padding:14px 18px;
+    background:rgba(0,0,0,0.14);
+    border-radius:10px;
+  }
+  .comment{
+    display:flex;
+    gap:10px;
+    margin-bottom:12px;
+    font-size:14px;
+  }
+  .comment:last-of-type{margin-bottom:0;}
+  .comment .avatar{
+    width:24px;height:24px;
+    border-radius:50%;
+    font-size:11px;
+    flex-shrink:0;
+  }
+  .comment .name{
+    font-weight:600;
+    color:var(--chalk-blue);
+    margin-right:6px;
+  }
+  .comment .text{color:var(--chalk-dim);}
+
+  .comment-form{
+    display:flex;
+    gap:8px;
+    margin-top:14px;
+  }
+  .comment-form input{
+    flex:1;
+    background:var(--board-2);
+    border:1px solid rgba(240,236,226,0.14);
+    border-radius:20px;
+    padding:9px 16px;
+    color:var(--chalk);
+    font-family:'Source Serif 4', serif;
+    font-size:14px;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .comment-form input:focus{border-color:var(--chalk-blue);}
+  .comment-form input::placeholder{color:var(--chalk-faint);}
+  .comment-form button{
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    background:transparent;
+    border:1px solid var(--chalk-blue);
+    color:var(--chalk-blue);
+    border-radius:20px;
+    padding:0 18px;
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+  }
+  .comment-form button:hover{background:var(--chalk-blue); color:var(--board);}
+
+  .empty-note{
+    text-align:center;
+    color:var(--chalk-faint);
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    padding:70px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="dot"></span>the weblog</div>
+  <div class="user">
+    <div class="avatar">{{ request.user.username|default:"?"|first|upper }}</div>
+    {{ request.user.username|default:"guest" }}
+    <a href="#" class="logout">log out</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ---------- new post form ---------- -->
+  <div class="composer">
+    <div class="label">new post</div>
+    <form method="post" action="{% url 'home' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="text" name="title" placeholder="Post title" required>
+      <textarea name="body" placeholder="What broke today?" required></textarea>
+
+      <div class="meta-row">
+        <div class="meta-field">
+          <span class="mini-label">Category</span>
+          <select name="category">
+            <option value="">Choose…</option>
+            {% for cat in categories %}
+              <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+          <input type="text" name="new_category" placeholder="or type a new one" style="margin-top:6px;background:var(--board-2);color:var(--chalk-dim);border:1px solid rgba(240,236,226,0.14);border-radius:6px;padding:6px 10px;font-family:'Space Mono', monospace;font-size:11px;">
+        </div>
+        <div class="meta-field">
+          <span class="mini-label">Tags</span>
+          <select name="tags" multiple size="1" style="height:36px;">
+            {% for tag in tags %}
+              <option value="{{ tag.id }}">{{ tag.name }}</option>
+            {% endfor %}
+          </select>
+          <input type="text" name="new_tag" placeholder="or type a new one" style="margin-top:6px;background:var(--board-2);color:var(--chalk-dim);border:1px solid rgba(240,236,226,0.14);border-radius:6px;padding:6px 10px;font-family:'Space Mono', monospace;font-size:11px;">
+        </div>
+        <div class="meta-field">
+          <span class="mini-label">Image</span>
+          <input type="file" name="image" accept="image/*" onchange="previewImage(this)">
+        </div>
+      </div>
+      <img id="filePreview" class="file-preview">
+
+      <div class="composer-footer">
+        <button class="btn" type="submit">Publish</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ---------- feed ---------- -->
+  {% for post in posts %}
+    <div class="post">
+      <div class="post-head">
+        <div class="post-author">
+          <div class="avatar">{{ post.author.user|first|upper }}</div>
+          <div>
+            <div class="name">{{ post.author.user }}</div>
+            <div class="time">{{ post.created_at|timesince }} ago</div>
+          </div>
+        </div>
+        <div class="post-actions">
+          {% if post.author.user == request.user.username %}
+            <form method="post" action="{% url 'delete_post' post.id %}">
+              {% csrf_token %}
+              <button class="delete" type="submit">delete</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
+      <h2 class="post-title">{{ post.title }}</h2>
+
+      {% if post.category.all or post.tags.all %}
+        <div class="taxonomy">
+          {% for cat in post.category.all %}
+            <span class="cat-pill">{{ cat.name }}</span>
+          {% endfor %}
+          {% for tag in post.tags.all %}
+            <span class="tag-pill">{{ tag.name }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% if post.image %}
+        <img class="post-image" src="{{ post.image.url }}" alt="{{ post.title }}">
+      {% endif %}
+
+      <div class="post-body">{{ post.body }}</div>
+
+      <div class="comments">
+        {% for comment in post.comment_set.all %}
+          <div class="comment">
+            <div class="avatar">{{ comment.author|first|upper }}</div>
+            <div><span class="name">{{ comment.author }}</span><span class="text">{{ comment.body }}</span></div>
+          </div>
+        {% endfor %}
+
+        <form method="post" action="{% url 'add_comment' post.id %}" class="comment-form">
+          {% csrf_token %}
+          <input type="text" name="author" placeholder="Your name" style="max-width:120px;">
+          <input type="text" name="text" placeholder="Write a comment…">
+          <button type="submit">Reply</button>
+        </form>
+      </div>
+    </div>
+  {% empty %}
+    <div class="empty-note">nothing here yet — write the first post.</div>
+  {% endfor %}
+
+</div>
+
+<script>
+  function previewImage(input){
+    const preview = document.getElementById('filePreview');
+    const file = input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+</script>
+
+</body>
+</html>
