@@ -303,6 +303,7 @@
     border-radius:20px;
     padding:2px 10px;
     font-weight:700;
+    text-decoration:none;
   }
   .cat-pill{
     font-family:'Space Mono', monospace;
@@ -312,6 +313,7 @@
     border-radius:20px;
     padding:2px 10px;
     font-weight:700;
+    text-decoration:none;
   }
   /* comments */
   .comments{
@@ -435,6 +437,15 @@
     </form>
   </div>
 
+  {% if active_category or active_tag %}
+    <div style="margin-bottom:20px;font-family:'Space Mono', monospace;font-size:12px;color:var(--chalk-dim);">
+      filtering by
+      {% if active_category %}<span class="cat-pill">{{ active_category.name }}</span>{% endif %}
+      {% if active_tag %}<span class="tag-pill">{{ active_tag.name }}</span>{% endif %}
+      — <a href="{% url 'home' %}" style="color:var(--chalk-blue);">clear</a>
+    </div>
+  {% endif %}
+
   <!-- ---------- feed ---------- -->
   {% for post in posts %}
     <div class="post">
@@ -447,12 +458,10 @@
           </div>
         </div>
         <div class="post-actions">
-          {% if post.author.user == request.user.username %}
-            <form method="post" action="{% url 'delete_post' post.id %}">
-              {% csrf_token %}
-              <button class="delete" type="submit">delete</button>
-            </form>
-          {% endif %}
+          <form method="post" action="{% url 'delete_post' post.id %}">
+            {% csrf_token %}
+            <button class="delete" type="submit">delete</button>
+          </form>
         </div>
       </div>
 
@@ -461,10 +470,10 @@
       {% if post.category.all or post.tags.all %}
         <div class="taxonomy">
           {% for cat in post.category.all %}
-            <span class="cat-pill">{{ cat.name }}</span>
+            <a class="cat-pill" href="{% url 'category_posts' cat.id %}">{{ cat.name }}</a>
           {% endfor %}
           {% for tag in post.tags.all %}
-            <span class="tag-pill">{{ tag.name }}</span>
+            <a class="tag-pill" href="{% url 'tag_posts' tag.id %}">{{ tag.name }}</a>
           {% endfor %}
         </div>
       {% endif %}

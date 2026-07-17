@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.utils.text import slugify
+from django.views.decorators.http import require_POST
 from .models import Post, Category, Tag, comment as Comment
 
 
@@ -46,18 +48,41 @@ def home(request):
     })
 
 
+@require_POST
 def add_comment(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    if request.method == 'POST':
+    text = (request.POST.get('text') or '').strip()
+    if text:
         Comment.objects.create(
             post=post,
-            author=request.POST.get('author') or 'anonymous',
-            body=request.POST.get('text'),
+            author=(request.POST.get('author') or '').strip() or 'anonymous',
+            body=text,
             created_at=timezone.now(),
         )
     return redirect('home')
 
 
+@require_POST
 def delete_post(request, post_id):
     get_object_or_404(Post, id=post_id).delete()
     return redirect('home')
+
+
+def category_posts(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    return render(request, 'accounts/home.html', {
+        'posts': Post.objects.filter(published=True, category=category).order_by('-created_at'),
+        'categories': Category.objects.all(),
+        'tags': Tag.objects.all(),
+        'active_category': category,
+    })
+
+
+def tag_posts(request, tag_id):
+    tag = get_object_or_404(Tag, id=tag_id)
+    return render(request, 'accounts/home.html', {
+        'posts': Post.objects.filter(published=True, tags=tag).order_by('-created_at'),
+        'categories': Category.objects.all(),
+        'tags': Tag.objects.all(),
+        'active_tag': tag,
+    })
