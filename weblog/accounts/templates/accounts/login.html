@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — the weblog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Space+Mono:wght@400;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board:#1a1b2e;
+    --board-2:#22243d;
+    --card:#262a45;
+    --chalk:#f0ece2;
+    --chalk-dim:#b8b4c9;
+    --chalk-faint:rgba(184,180,201,0.55);
+    --chalk-yellow:#ff6b5b;
+    --chalk-blue:#6bcfcf;
+    --chalk-rose:#d94f3f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; background:var(--board);
+    font-family:'Source Serif 4', serif; color:var(--chalk);
+    -webkit-font-smoothing:antialiased;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .brand{
+    font-family:'Caveat', cursive; font-weight:700; font-size:36px;
+    display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:28px;
+  }
+  .brand .dot{width:8px;height:8px;border-radius:50%;background:var(--chalk-yellow);box-shadow:0 0 6px var(--chalk-yellow);}
+  .auth-card{width:100%; max-width:380px;}
+  .panel{background:var(--card); border:1px solid rgba(240,236,226,0.1); border-radius:10px; padding:28px 26px;}
+  .panel .label{font-family:'Space Mono', monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--chalk-blue); margin-bottom:20px;}
+  .error-box{
+    background:rgba(217,79,63,0.12); border:1px solid rgba(217,79,63,0.4);
+    color:var(--chalk-rose); font-family:'Space Mono', monospace; font-size:12px;
+    padding:10px 14px; border-radius:6px; margin-bottom:18px;
+  }
+  .field{margin-bottom:18px;}
+  .field .mini-label{display:block; font-family:'Space Mono', monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--chalk-faint); margin-bottom:8px;}
+  .field input{
+    width:100%; background:var(--board-2); border:1px solid rgba(240,236,226,0.14); border-radius:8px;
+    color:var(--chalk); font-family:'Source Serif 4', serif; font-size:15px; padding:11px 14px; outline:none;
+    transition:border-color .15s ease;
+  }
+  .field input:focus{border-color:var(--chalk-blue);}
+  .field input::placeholder{color:var(--chalk-faint);}
+  .row-between{display:flex; justify-content:space-between; align-items:center; margin:-6px 0 20px;}
+  .remember{display:flex; align-items:center; gap:6px; font-family:'Space Mono', monospace; font-size:11px; color:var(--chalk-dim);}
+  .btn{width:100%; font-family:'Space Mono', monospace; font-size:13px; letter-spacing:0.04em; border:none; padding:12px 18px; border-radius:6px; cursor:pointer; font-weight:700; transition:filter .15s ease, background .15s ease, color .15s ease;}
+  .btn-primary{background:var(--chalk-yellow); color:var(--board);}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .divider{display:flex; align-items:center; gap:12px; margin:22px 0;}
+  .divider .line{flex:1; height:1px; background:rgba(240,236,226,0.12);}
+  .divider span{font-family:'Space Mono', monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--chalk-faint);}
+  .btn-secondary{background:transparent; color:var(--chalk-blue); border:1px solid var(--chalk-blue);}
+  .btn-secondary:hover{background:var(--chalk-blue); color:var(--board);}
+  .hint{text-align:center; margin-top:16px; font-family:'Space Mono', monospace; font-size:12px; color:var(--chalk-faint);}
+</style>
+</head>
+<body>
+
+<div class="auth-card">
+  <div class="brand"><span class="dot"></span>the weblog</div>
+
+  <div class="panel">
+    <div class="label">log in</div>
+
+    {% if error %}
+      <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div class="field">
+        <span class="mini-label">Username</span>
+        <input type="text" name="username" placeholder="your username" required autofocus>
+      </div>
+      <div class="field">
+        <span class="mini-label">Password</span>
+        <input type="password" name="password" placeholder="••••••••" required>
+      </div>
+
+      <div class="row-between">
+        <label class="remember">
+          <input type="checkbox" name="remember">
+          remember me
+        </label>
+      </div>
+
+      <button class="btn btn-primary" type="submit">Log In</button>
+    </form>
+
+    <div class="divider"><span class="line"></span><span>or</span><span class="line"></span></div>
+
+    <a href="{% url 'signup' %}">
+      <button class="btn btn-secondary" type="button">Create New Account</button>
+    </a>
+  </div>
+
+  <div class="hint">don't have an account yet? tap the button above.</div>
+</div>
+
+</body>
+</html>

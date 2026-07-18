@@ -388,15 +388,20 @@
 <div class="topbar">
   <div class="brand"><span class="dot"></span>the weblog</div>
   <div class="user">
-    <div class="avatar">{{ request.user.username|default:"?"|first|upper }}</div>
-    {{ request.user.username|default:"guest" }}
-    <a href="#" class="logout">log out</a>
+    <div class="avatar">{{ current_username|default:"?"|first|upper }}</div>
+    {{ current_username|default:"guest" }}
+    {% if current_username %}
+      <a href="{% url 'logout' %}" class="logout">log out</a>
+    {% else %}
+      <a href="{% url 'login' %}" class="logout">log in</a>
+    {% endif %}
   </div>
 </div>
 
 <div class="wrap">
 
   <!-- ---------- new post form ---------- -->
+  {% if current_username %}
   <div class="composer">
     <div class="label">new post</div>
     <form method="post" action="{% url 'home' %}" enctype="multipart/form-data">
@@ -436,6 +441,11 @@
       </div>
     </form>
   </div>
+  {% else %}
+  <div class="composer" style="text-align:center;">
+    <a href="{% url 'login' %}" style="color:var(--chalk-blue);">log in</a> to write a new post.
+  </div>
+  {% endif %}
 
   {% if active_category or active_tag %}
     <div style="margin-bottom:20px;font-family:'Space Mono', monospace;font-size:12px;color:var(--chalk-dim);">
@@ -458,10 +468,12 @@
           </div>
         </div>
         <div class="post-actions">
-          <form method="post" action="{% url 'delete_post' post.id %}">
-            {% csrf_token %}
-            <button class="delete" type="submit">delete</button>
-          </form>
+          {% if current_username == post.author.user %}
+            <form method="post" action="{% url 'delete_post' post.id %}">
+              {% csrf_token %}
+              <button class="delete" type="submit">delete</button>
+            </form>
+          {% endif %}
         </div>
       </div>
 

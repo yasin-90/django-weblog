@@ -1,18 +1,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.utils.text import slugify
 from django.views.decorators.http import require_POST
 from .models import Post, Category, Tag, comment as Comment
+from accounts.models import User
 
 
 def home(request):
+    user_id = request.session.get('user_id')
+
     if request.method == 'POST':
+        if not user_id:
+            return redirect('login')
+
         post = Post.objects.create(
             title=request.POST.get('title'),
             slug=slugify(request.POST.get('title', ''))[:30] or f"post-{timezone.now().timestamp()}",
             body=request.POST.get('body'),
-            author_id=1,
+            author_id=user_id,
             image=request.FILES.get('image'),
             published=True,
             created_at=timezone.now(),
@@ -45,6 +50,7 @@ def home(request):
         'posts': Post.objects.filter(published=True).order_by('-created_at'),
         'categories': Category.objects.all(),
         'tags': Tag.objects.all(),
+        'current_username': request.session.get('username'),
     })
 
 
@@ -64,7 +70,11 @@ def add_comment(request, post_id):
 
 @require_POST
 def delete_post(request, post_id):
-    get_object_or_404(Post, id=post_id).delete()
+    user_id = request.session.get('user_id')
+    post = get_object_or_404(Post, id=post_id)
+    if not user_id or post.author_id != user_id:
+        return redirect('home')
+    post.delete()
     return redirect('home')
 
 
@@ -75,6 +85,7 @@ def category_posts(request, category_id):
         'categories': Category.objects.all(),
         'tags': Tag.objects.all(),
         'active_category': category,
+        'current_username': request.session.get('username'),
     })
 
 
@@ -85,4 +96,5 @@ def tag_posts(request, tag_id):
         'categories': Category.objects.all(),
         'tags': Tag.objects.all(),
         'active_tag': tag,
+        'current_username': request.session.get('username'),
     })
